@@ -16,7 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Company> _searchResults = [];
 
   Future<double> _getLatestPrice(String symbol) async {
-    var apiKey = 'GCZ1Z8BJJMXEWVDA';
+    var apiKey = 'demo';
     var apiUrl = 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=$symbol&apikey=$apiKey';
     var response = await http.get(Uri.parse(apiUrl));
 
@@ -65,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _fetchCompanies(String keyword) async {
     final response = await http.get(
-      Uri.parse('https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=$keyword&apikey=GCZ1Z8BJJMXEWVDA'),
+      Uri.parse('https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=$keyword&apikey=demo'),
     );
 
     if (response.statusCode == 200) {
