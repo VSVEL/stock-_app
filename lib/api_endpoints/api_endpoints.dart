@@ -15,7 +15,7 @@ class StockApi {
     var response = await http.get(Uri.parse(
         'https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=' +
             stockSymbol! +
-            '&apikey=0IEXC0UP6ELBV132'));
+            '&apikey=demo'));
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
