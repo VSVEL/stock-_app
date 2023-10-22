@@ -104,7 +104,7 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
 
 
   Future<double> _getLatestPrice(String symbol) async {
-    var apiKey = 'GCZ1Z8BJJMXEWVDA';
+    var apiKey = 'demo';
     var apiUrl = 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=$symbol&apikey=$apiKey';
     var response = await http.get(Uri.parse(apiUrl));
 
