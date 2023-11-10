@@ -23,7 +23,7 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
 
   @override
   void dispose() {
-    watchlistBox.close();
+    // watchlistBox.close();
     super.dispose();
   }
 
@@ -45,7 +45,7 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          } else if (!snapshot.hasData) {
             return Center(child: Text('No stocks in the watchlist'));
           } else {
             var watchlistItems = snapshot.data as List<WatchlistItem>;
@@ -54,7 +54,7 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
               itemBuilder: (context, index) {
                 var watchlistItem = watchlistItems[index];
                 return Dismissible(
-                  key: Key(watchlistItem.symbol), // Unique key for each item
+                  key: Key(watchlistItem.symbol!), // Unique key for each item
                   onDismissed: (direction) {
                     // Remove item from Hive database and update UI
                     _removeFromWatchlist(watchlistItem);
@@ -67,9 +67,9 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
                   },
                   background: Container(color: Colors.red),
                   child: ListTile(
-                    title: Text(watchlistItem.symbol),
+                    title: Text(watchlistItem.symbol!),
                     subtitle: FutureBuilder(
-                      future: _getLatestPrice(watchlistItem.symbol),
+                      future: _getLatestPrice(watchlistItem.symbol!),
                       builder: (context, priceSnapshot) {
                         if (priceSnapshot.connectionState == ConnectionState.waiting) {
                           return Text('Loading...');
@@ -104,14 +104,14 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
 
 
   Future<double> _getLatestPrice(String symbol) async {
-    var apiKey = 'GCZ1Z8BJJMXEWVDA';
-    var apiUrl = 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=$symbol&apikey=$apiKey';
+    //var apiKey = '0IEXC0UP6ELBV132';
+    var apiUrl = 'https://dev.portal.tradebrains.in/api/search?keyword=$symbol';
     var response = await http.get(Uri.parse(apiUrl));
 
     if (response.statusCode == 200) {
       var data = json.decode(response.body);
-      var latestPrice = data['Global Quote']['05. price'];
-      return double.parse(latestPrice);
+      var latestPrice = 10.0;
+      return latestPrice;
     } else {
       throw Exception('Failed to fetch latest price');
     }

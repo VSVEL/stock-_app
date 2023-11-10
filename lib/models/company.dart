@@ -1,24 +1,19 @@
-class SearchStock {
-  String? symbol;
-  String? name;
-  String? type;
+class Company {
+  final String type;
+  final String company;
+  final String symbol;
 
-  SearchStock({this.symbol, this.name, this.type});
+  Company({
+    required this.company,
+    required this.symbol,
+    required this.type
+  });
 
-  SearchStock.fromJson(Map<String, dynamic> json) {
-    symbol = json['symbol'];
-    name = json['name'];
-    type = json['type'];
+  factory Company.fromJson(Map<String, dynamic> json) {
+    return Company(
+      type: json['type'] as String,
+      symbol: json['symbol'] as String,
+      company: json['company'] as String,
+    );
   }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['symbol'] = symbol;
-    data['name'] = name;
-    data['type'] = type;
-    return data;
-  }
-
 }
-
-

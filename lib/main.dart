@@ -9,6 +9,7 @@ import 'models/watchlist.dart';
 Future <void> main() async{
   await Hive.initFlutter();
   Hive.registerAdapter<WatchlistItem>(WatchlistItemAdapter());
+  await Hive.openBox<WatchlistItem>('watchlist');
   runApp(MyApp());
 }
 

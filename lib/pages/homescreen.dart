@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'package:collection/collection.dart';
+import '../models/company.dart';
 import '../models/watchlist.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,11 +14,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   TextEditingController _searchController = TextEditingController();
-  List<Company> _searchResults = [];
+  List<dynamic> _searchResults = [];
 
   Future<double> _getLatestPrice(String symbol) async {
-    var apiKey = 'GCZ1Z8BJJMXEWVDA';
-    var apiUrl = 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=$symbol&apikey=$apiKey';
+    //var apiKey = '0IEXC0UP6ELBV132';
+    var apiUrl = 'https://dev.portal.tradebrains.in/api/search?keyword=$symbol';
     var response = await http.get(Uri.parse(apiUrl));
 
     if (response.statusCode == 200) {
@@ -39,48 +40,61 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    watchlistBox.close();
+    //watchlistBox.close();
     super.dispose();
   }
 
   void openWatchlistBox() async {
-    watchlistBox = await Hive.openBox<WatchlistItem>('watchlist');
+    watchlistBox = await Hive.openBox('watchlist');
   }
 
   void _addToWatchlist(Company company) async {
     try {
-      var latestPrice = await _getLatestPrice(company.symbol);
-      var watchlistItem = WatchlistItem(
-        symbol: company.symbol,
-        latestPrice: latestPrice,
+      var latestPrice = 10.0;
+
+      // Check if the item with the same symbol already exists
+      var existingItem = watchlistBox.values.firstWhereOrNull(
+            (item) => item.symbol == company.symbol,
       );
-      watchlistBox.add(watchlistItem);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${company.name} added to watchlist')),
-      );
+
+      if (existingItem != null) {
+        // Item with the same symbol already exists
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${company.company} is already in the watchlist')),
+        );
+      } else {
+        // Item doesn't exist, add it to the watchlist
+        var watchlistItem = WatchlistItem(
+          symbol: company.symbol,
+          latestPrice: latestPrice,
+          company: company.company,
+          type: company.type,
+        );
+
+        watchlistBox.add(watchlistItem);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${company.company} added to watchlist')),
+        );
+      }
     } catch (e) {
       print('Error: $e');
     }
   }
 
+
   Future<void> _fetchCompanies(String keyword) async {
     final response = await http.get(
-      Uri.parse('https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=$keyword&apikey=GCZ1Z8BJJMXEWVDA'),
+      Uri.parse('https://dev.portal.tradebrains.in/api/search?keyword=$keyword'),
     );
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       print(data);
-      if (data.containsKey('bestMatches')) {
-        final companies = data['bestMatches'] as List<dynamic>;
-        setState(() {
-          _searchResults = companies.map((company) => Company.fromJson(company)).toList();
-        });
-      } else {
-        setState(() {
-          _searchResults = [];
-        });
-      }
+      var companies = json.decode(response.body);
+      setState(() {
+        _searchResults = companies.map((company) => Company.fromJson(company)).toList();
+      });
     } else {
       setState(() {
         _searchResults = [];
@@ -116,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
               itemBuilder: (context, index) {
                 var company = _searchResults[index];
                 return ListTile(
-                  title: Text(_searchResults[index].name),
+                  title: Text(_searchResults[index].company),
                   subtitle: Text('Symbol: ${_searchResults[index].symbol}'),
                   trailing: IconButton(
                     icon: Icon(Icons.add),
@@ -134,19 +148,4 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class Company {
-  final String name;
-  final String symbol;
 
-  Company({
-    required this.name,
-    required this.symbol,
-  });
-
-  factory Company.fromJson(Map<String, dynamic> json) {
-    return Company(
-      name: json['2. name'] as String,
-      symbol: json['1. symbol'] as String,
-    );
-  }
-}
